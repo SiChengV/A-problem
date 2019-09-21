@@ -1,0 +1,150 @@
+
+
+
+An AVL tree is a self-balancing binary search tree. In an AVL tree, the heights of the two child subtrees of any node differ by at most one; if at any time they differ by more than one, rebalancing is done to restore this property. Figures 1-4 illustrate the rotation rules.
+
+ 
+ 
+
+Now given a sequence of insertions, you are supposed to tell the root of the resulting AVL tree.
+Input Specification:
+Each input file contains one test case. For each case, the first line contains a positive integer N (≤20) which is the total number of keys to be inserted. Then N distinct integer keys are given in the next line. All the numbers in a line are separated by a space.
+
+Output Specification:
+For each test case, print the root of the resulting AVL tree in one line.
+
+Sample Input 1:
+5
+88 70 61 96 120
+Sample Output 1:
+70
+Sample Input 2:
+7
+88 70 61 96 120 90 65
+Sample Output 2:
+88
+
+
+
+-------------------------------------------------------------------------
+C代码如下：
+
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct AvlNode *Position;
+struct AvlNode{
+    Position Left;
+    Position Right;
+    int Data;
+    int Height;
+};
+
+//创建一个新节点并返回节点地址（Data）
+Position NewNode(int Data){
+    Position T;
+    T = (Position)malloc(sizeof(struct AvlNode));
+    T->Left = NULL;
+    T->Right = NULL;
+    T->Data = Data;
+    T->Height = 0;
+    return T;
+}
+
+//建树
+Position MakeTree(){
+    Position T;
+    int V;
+    scanf("%d", &V);
+    T = NewNode(V);
+    return T;
+}
+
+int GetHeight(Position T){
+    if(!T)
+        return 0;
+    int L = GetHeight(T->Left);
+    int R = GetHeight(T->Right);
+    return (L>R)?(L+1):(R+1);
+}
+
+//LL旋转
+Position SingleLeftRotation(Position T){
+    Position M;
+    M = T->Left;
+    T->Left = M->Right;
+    M->Right = T;
+    M->Height = GetHeight(M);
+    T->Height = GetHeight(T);
+    return M;
+}
+
+//RR旋转
+Position SingleRightRotation(Position T){
+    Position M;
+    M = T->Right;
+    T->Right = M->Left;
+    M->Left = T;
+    M->Height = GetHeight(M);
+    T->Height = GetHeight(T);
+    return M;
+}
+
+//LR旋转
+Position DoubleLeftRightRotation(Position T){
+    T->Left = SingleRightRotation(T->Left);
+    return SingleLeftRotation(T);
+}
+
+Position DoubleRightLeftRotation(Position T){
+    T->Right = SingleLeftRotation(T->Right);
+    return SingleRightRotation(T);
+}
+
+//把data作为新节点插入到T树
+Position Insert(Position T, int Data){
+    if(!T){
+        T = (Position)malloc(sizeof(struct AvlNode));
+        T->Data = Data;
+        T->Left = T->Right = NULL;
+        T->Height = 0;
+    }else if(Data < T->Data){
+        //插入到左子树
+        T->Left = Insert(T->Left, Data);
+        //如果T的平衡被破坏
+        if(GetHeight(T->Left) - GetHeight(T->Right) == 2){
+            if(Data < T->Left->Data)
+                //LL旋转
+                T = SingleLeftRotation(T);
+            else
+                //LR旋转
+                T = DoubleLeftRightRotation(T);
+        }
+    }else{
+        T->Right = Insert(T->Right, Data);
+        if(GetHeight(T->Right) - GetHeight(T->Left) == 2){
+            if(Data > T->Right->Data)
+                T = SingleRightRotation(T);
+            else
+                T = DoubleRightLeftRotation(T);
+        }
+    }
+    //更新高度
+    T->Height = GetHeight(T);
+    return T;
+}
+
+int main(){
+    Position T;
+    int N, i, Data;
+    scanf("%d", &N);
+    if(N)
+        T = MakeTree();
+    for(i=1; i<N; i++){
+        scanf("%d", &Data);
+        T = Insert(T, Data);
+    }
+    if(N)
+        printf("%d", T->Data);
+
+}
