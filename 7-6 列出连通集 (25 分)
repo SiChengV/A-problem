@@ -1,0 +1,142 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<stdbool.h>
+
+
+typedef struct Graph *GNode;
+struct Graph{
+    int Nv;
+    int Ne;
+    int arr[10][10];
+};
+
+typedef struct Queue *QNode;
+struct Queue{
+    int data;
+    QNode next;
+};
+
+//创建一个空图
+GNode creatGraph(int Nv, int Ne){
+    GNode G;
+    G = (GNode)malloc(sizeof(struct Graph));
+    G->Nv = Nv;
+    G->Ne = Ne;
+    memset(G->arr, 0, sizeof(G->arr));
+    return G;
+}
+
+//把边都读进来
+void ReadEdge(GNode G, int E){
+    int N1, N2;
+    while(E){
+        scanf("%d %d", &N1, &N2);
+        G->arr[N1][N2] = 1;
+        G->arr[N2][N1] = 1;
+        --E;
+    }
+
+}
+
+//用来标记是否已经走过
+bool visited[10];
+
+//DFS
+void DFS(GNode G, int Node){
+    visited[Node] = true;
+    printf(" %d", Node);
+    for(int i=0; i<G->Nv; i++){
+        if((G->arr[Node][i] == 1) && (visited[i] == false))
+            DFS(G, i);
+    }
+}
+
+//创建一个空队列
+QNode creatQueue(){
+    QNode Q;
+    Q = (QNode)malloc(sizeof(struct Queue));
+    Q->next = NULL;
+    return Q;
+}
+
+//入队
+void enqueue(int Node, QNode Q){
+    QNode P;
+    P = (QNode)malloc(sizeof(struct Queue));
+    P->data = Node;
+    P->next = NULL;
+    while(Q->next)
+        Q = Q->next;
+    Q->next = P;
+}
+
+//出队
+int Pop(QNode Q){
+    int data;
+    QNode Dq;
+    Dq = Q->next;
+    if(Dq){
+        Q->next = Dq->next;
+        data = Dq->data;
+        free(Dq);
+        return data;
+    }
+}
+
+//BFS
+void BFS(GNode G, int Node, QNode Q){
+    int data;
+    enqueue(Node, Q);
+    visited[Node] = true;
+    printf("{");
+    while(Q->next){
+        data = Pop(Q);
+        printf(" %d", data);
+        for(int i=0; i<G->Nv; i++){
+            if((visited[i] != true) && (G->arr[data][i] == 1)){
+                enqueue(i, Q);
+                visited[i] = true;
+            }
+        }
+    }
+    printf(" }\n");
+}
+
+int main(){
+    int N, E;
+    GNode G;
+    scanf("%d %d", &N, &E);
+    G = creatGraph(N, E);
+    ReadEdge(G, E);
+    for(int i=0; i<10; i++){
+        visited[i] = false;
+    }
+
+    //对图进行DFS
+    for(int i=0; i<G->Nv; i++){
+        //检测每一个非连通分量
+
+        if(visited[i] == false){
+            printf("{");
+            DFS(G, i);
+            printf(" }");
+            printf("\n");
+        }
+    }
+
+    //对图进行BFS
+    QNode Q;
+    Q = creatQueue();
+    for(int i=0; i<10; i++){
+        visited[i] = false;
+    }
+    for(int i=0; i<G->Nv; i++){
+        //检测每一个非连通分量
+        if(visited[i] == false){
+            BFS(G, i, Q);
+        }
+    }
+    return 0;
+}
+
