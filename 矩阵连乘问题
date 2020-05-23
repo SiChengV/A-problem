@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <string.h>
+
+int dp[100][100];
+int arr[100][2];
+
+
+int main(){
+    FILE *fp1;
+    int N, i, j, k;
+    memset(dp, -1, sizeof(dp));
+    fp1 = fopen("CInput.txt", "r");
+    fscanf(fp1, "%d", &N);
+    for(i=0; i<N; i++){
+        fscanf(fp1, "%d %d", &arr[i][0], &arr[i][1]);
+    }
+
+    for(i=0; i<N; i++){
+
+        for(j=0; j<N-i; j++){
+            if(i==0){
+                dp[j][j] = 0;
+            } else if(i==1){
+                dp[j][j+i] = arr[j][0] * arr[j][1] * arr[j+i][1];
+            } else if (dp[j][j+i] == -1){
+                int min = 9999999;
+                for(k=j; k<(j+i); k++){
+                    int sum = dp[j][k] + dp[k+1][j+i] + arr[j][0]*arr[k][1]*arr[j+i][1];
+                    if(sum < min)
+                        min = sum;
+                }
+                dp[j][j+i] = min;
+            }
+        }
+    }
+
+    printf("%d", dp[0][N-1]);
+    return 0;
+}
