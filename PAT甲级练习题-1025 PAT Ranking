@@ -1,0 +1,101 @@
+Programming Ability Test (PAT) is organized by the College of Computer Science and Technology of Zhejiang University. Each test is supposed to run simultaneously in several places, and the ranklists will be merged immediately after the test. Now it is your job to write a program to correctly merge all the ranklists and generate the final rank.
+
+Input Specification:
+
+Each input file contains one test case. For each case, the first line contains a positive number N (≤100), the number of test locations. Then N ranklists follow, each starts with a line containing a positive integer K (≤300), the number of testees, and then K lines containing the registration number (a 13-digit number) and the total score of each testee. All the numbers in a line are separated by a space.
+
+Output Specification:
+
+For each test case, first print in one line the total number of testees. Then print the final ranklist in the following format:
+
+registration_number final_rank location_number local_rank
+The locations are numbered from 1 to N. The output must be sorted in nondecreasing order of the final ranks. The testees with the same score must have the same rank, and the output must be sorted in nondecreasing order of their registration numbers.
+
+Sample Input:
+
+2
+5
+1234567890001 95
+1234567890005 100
+1234567890003 95
+1234567890002 77
+1234567890004 85
+4
+1234567890013 65
+1234567890011 25
+1234567890014 100
+1234567890012 85
+Sample Output:
+
+9
+1234567890005 1 1 1
+1234567890014 1 2 1
+1234567890001 3 1 2
+1234567890003 3 1 2
+1234567890004 5 1 4
+1234567890012 5 2 2
+1234567890002 7 1 5
+1234567890013 8 2 3
+1234567890011 9 2 4
+
+----------------------------------------------------
+这题本来用的longlong存ID，但是最后一个测试用例会数据错误
+改成用char数组来存就通过了，略坑爹，以后遇到这种特别长的数字还是用char数组来存好了
+
+献上代码：
+
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+struct RankInfo{
+    char ID[15];
+    int score;
+    int group;
+    int finalRank;
+    int groupRank;
+}arr[40000];
+
+bool cmp(RankInfo a, RankInfo b){
+    if(a.score != b.score)
+        return a.score > b.score;
+    else
+        return strcmp(a.ID, b.ID) < 0;
+}
+
+int main(){
+    int i, num = 0, N, K, groupNum = 1;
+    scanf("%d", &N);
+    while(N--){
+        scanf("%d", &K);
+        for(i=0; i<K; i++){
+            scanf("%s %d", arr[num].ID, &arr[num].score);
+            arr[num].group = groupNum;
+            num++;
+        }
+        groupNum++;
+        sort(arr + num - K, arr + num, cmp);
+        arr[num - K].groupRank = 1;
+        for(i=num - K + 1; i<num; i++){
+            if(arr[i].score == arr[i-1].score){
+                arr[i].groupRank = arr[i-1].groupRank;
+            } else
+                arr[i].groupRank = i - (num - K) + 1;
+        }
+    }
+
+    sort(arr, arr+num, cmp);
+    arr[0].finalRank = 1;
+    printf("%d\n", num);
+    printf("%s %d %d %d\n", arr[0].ID, arr[0].finalRank, arr[0].group, arr[0].groupRank);
+    for(i=1; i<num; i++){
+        if(arr[i].score == arr[i-1].score)
+            arr[i].finalRank = arr[i-1].finalRank;
+        else
+            arr[i].finalRank = i + 1;
+        printf("%s %d %d %d\n", arr[i].ID, arr[i].finalRank, arr[i].group, arr[i].groupRank);
+    }
+    return 0;
+}
