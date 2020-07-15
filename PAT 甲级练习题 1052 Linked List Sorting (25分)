@@ -112,7 +112,3 @@ int main() {
 }
 ```
 
-# 标题
-
-
-                printf("%05d %d -1\n", node[i].begin, node[i].data);
