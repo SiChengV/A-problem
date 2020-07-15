@@ -1,0 +1,113 @@
+1052 Linked List Sorting (25分)
+A linked list consists of a series of structures, which are not necessarily adjacent in memory. We assume that each structure contains an integer key and a Next pointer to the next structure. Now given a linked list, you are supposed to sort the structures according to their key values in increasing order.
+
+Input Specification:
+Each input file contains one test case. For each case, the first line contains a positive N (<10
+​5
+​​ ) and an address of the head node, where N is the total number of nodes in memory and the address of a node is a 5-digit positive integer. NULL is represented by −1.
+
+Then N lines follow, each describes a node in the format:
+
+Address Key Next
+where Address is the address of the node in memory, Key is an integer in [−10
+​5
+​​ ,10
+​5
+​​ ], and Next is the address of the next node. It is guaranteed that all the keys are distinct and there is no cycle in the linked list starting from the head node.
+
+Output Specification:
+For each test case, the output format is the same as that of the input, where N is the total number of nodes in the list and all the nodes must be sorted order.
+
+Sample Input:
+5 00001
+11111 100 -1
+00001 0 22222
+33333 100000 11111
+12345 -1 33333
+22222 1000 12345
+Sample Output:
+5 12345
+12345 -1 00001
+00001 0 11111
+11111 100 22222
+22222 1000 33333
+33333 100000 -1
+
+---
+
+``` c++
+#include <cstdio>
+#include <string>
+#include <iostream>
+#include <map>
+#include <stack>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+struct Node{
+    int begin;
+    int data;
+    int next;
+    int flag;
+    Node(){
+        flag = 0;
+    }
+}node[100000];
+
+
+
+int begin1, begin2;
+
+void input(){
+    //输入数据
+    int N, start, next;
+    int c;
+    scanf("%d %d", &N, &begin1);
+    while(N--){
+        scanf("%d %d %d", &start, &c, &next);
+        node[start].begin = start;
+        node[start].data = c;
+        node[start].next = next;
+    }
+}
+
+bool cmp(Node a, Node b){
+    //构造比较规则
+    if(a.flag==0 || b.flag==0){
+        return a.flag > b.flag;
+    } else{
+        return a.data < b.data;
+    }
+
+}
+
+int main() {
+    int next, count = 0;
+    input();
+    next = begin1;
+    //遍历第一条静态链表 并把flag置为1，表示这些节点在第一条链表中出现过
+    while(next != -1){
+        node[next].flag = 1;
+        count++;
+        next = node[next].next;
+    }
+
+    sort(node, node+100000, cmp);
+    next = begin1;
+    if(count == 0){
+        printf("0 -1\n");
+    }else{
+        printf("%d %05d\n", count, node[0].begin);
+        for(int i=0; i<count; i++){
+            if(i != count-1)
+                printf("%05d %d %05d\n", node[i].begin, node[i].data, node[i+1].begin);
+            else
+                printf("%05d %d -1\n", node[i].begin, node[i].data);
+        }
+    }
+
+
+}
+```
